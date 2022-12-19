@@ -1,0 +1,27 @@
+#!/bin/sh
+# devtmpfs does not get automounted for initramfs
+/bin/mount -t devtmpfs devtmpfs /dev
+/bin/mount -t proc proc /proc
+/bin/mount -t sysfs sysfs /sys
+
+exec 0</dev/console
+exec 1>/dev/console
+exec 2>/dev/console
+
+while [ ! -e ROOT_DEV ]
+do
+	busybox usleep 50000
+done
+
+#/bin/tee-supplicant &
+#key=`/bin/testapp_storage_from_uboot`
+#busybox killall tee-supplicant
+
+losetup -f /dev/mmcblk1p9
+cryptsetup open --type luks /dev/loop0 rootfs --key-file keyfile
+
+mount -t squashfs -o loop /dev/mapper/rootfs /mnt/
+
+# busybox echo "Hello Enter Ramdisk Test System"
+exec busybox switch_root /mnt /init
+# exec /sbin/init "$@"

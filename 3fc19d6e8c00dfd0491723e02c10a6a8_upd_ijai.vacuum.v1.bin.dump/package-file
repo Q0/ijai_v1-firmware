@@ -1,0 +1,14 @@
+# NAME		Relative path
+#
+#HWDEF		HWDEF
+package-file	package-file
+bootloader	Image/MiniLoaderAll.bin
+parameter	Image/parameter.txt
+boot_a		Image/boot_a.img
+boot_b		Image/boot_b.img
+system_a	Image/rootfs_a.img
+system_b	Image/rootfs_b.img
+vbmeta_a	Image/vbmeta_a.img
+vbmeta_b	Image/vbmeta_b.img
+
+

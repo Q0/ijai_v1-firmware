@@ -1,0 +1,4 @@
+m_ai_dirty_object_detect_threshold:0.4
+m_ai_dirty_object_liquid:0.01
+m_ai_dirty_object_solid:0.01
+m_ai_dirty_object_hair:0.01

@@ -1,0 +1,21 @@
+日期：20201219
+版本号：V1.0.0
+一、更新说明：
+1.启用版本号控制。
+2.该版本程序经过过滤，即将原始程序中不使用的api，model删除。
+3.更新all_class_model.rknn文件，解决门槛误识别成电线，脏污误识别成电线问题。
+
+二、更新文件MD5：
+1、文件包路径(3326)：/robot/AI
+59d12c1df5d88c53d7454e4b2991ef24  README
+c7baee74f62964c72156a72680cbf378  ai_config.txt
+b1bc2e35c8d8ccab1b9d22c98200cc1b  ai_log_config.ini
+025678aa8e837510cc673f78e75f83b5  all_class_model.rknn
+170e777ad2dc2f0fefee22867302fff5  class_min_score.txt
+3388fb1ea1b7a5839b86a05b798eac9e  yolo4_tiny.rknn
+2、文件包路径(3326): /robot/app/bin
+a90672362d19a82adda6c8de8e020b62  Ai-server(Note:关闭数据采集功能)
+3b6df88114636b7e6b6af5778fedddff  Ai-server(Note:开启数据采集功能)
+
+三、未更新文件MD5(首次启用版本控制，无未更新文件)：
+

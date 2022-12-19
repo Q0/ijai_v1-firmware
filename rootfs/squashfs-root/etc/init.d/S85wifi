@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Start/stop wifi
+#
+
+WIFI=/usr/sbin/wpa_supplicant
+
+[ -x $WIFI ] || exit 0
+
+case "$1" in
+  start)
+	if [ -f "/userdata/cfg/wpa_supplicant.conf" ];then
+	echo "Starting wpa_supplicant..."
+	wpa_supplicant -B -i wlan0 -c /data/cfg/wpa_supplicant.conf
+	echo "OK"
+	fi
+	;;
+  stop)
+	echo "Stoping wpa_supplicant..."
+	killall wpa_supplicant
+	;;
+  restart)
+	"$0" stop
+	sleep 1 # Prevent race condition: ensure wifi stops before start.
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+

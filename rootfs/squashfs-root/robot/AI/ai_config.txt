@@ -1,0 +1,6 @@
+m_ai_moded:2
+m_data_collection_frequt:3
+m_obj_detect_num_limit:1
+m_image_upload_server_floor_frequt:3
+m_image_upload_server_object_frequt:1
+m_image_upload_difference_limit_count:5

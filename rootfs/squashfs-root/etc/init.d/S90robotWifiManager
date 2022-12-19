@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Start/stop wifiManager
+#
+
+WIFIMANAGER=/oem/bin/wifiManager
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/oem/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/oem/miio/lib
+[ -x $WIFIMANAGER ] || exit 0
+
+case "$1" in
+  start)
+	echo "Starting wifiManager..."
+	start-stop-daemon -S -b -x "$WIFIMANAGER"
+	/oem/bin/wifi_deamon.sh &
+	echo "OK"
+	;;
+  stop)
+	echo "Stoping wifiManager..."
+	start-stop-daemon -K -n "$WIFIMANAGER"
+	;;
+  restart)
+	"$0" stop
+	sleep 1 # Prevent race condition: ensure wifiManager stops before start.
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+

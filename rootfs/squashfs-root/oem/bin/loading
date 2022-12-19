@@ -1,0 +1,23 @@
+#!/bin/sh
+
+CPU_FREQ=/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq
+DDR_FREQ=/sys/class/devfreq/dmc/cur_freq
+TEMP=/sys/class/thermal/thermal_zone0/temp
+
+function get_ddr_use
+{
+:
+}
+
+echo "|CPU|DDR|TEMP|MEM_USED|MEM_FREE|CPU_USER|CPU_SYS|CPU_IDLE|"
+
+while sleep 1; do
+  echo "|$(cat $CPU_FREQ)|\
+$(cat $DDR_FREQ)|\
+$(cat $TEMP)|\
+$(free | grep Mem | awk '{print $3}')|\
+$(free | grep Mem | awk '{print $4}')|\
+$(top -n 1 | grep sirq | awk '{print $2}')|\
+$(top -n 1 | grep sirq | awk '{print $4}')|\
+$(top -n 1 | grep sirq | awk '{print $8}')|"
+done

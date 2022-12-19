@@ -1,0 +1,169 @@
+#!/bin/sh
+#
+# Do some initialzation for 3irobotics....
+#
+
+case "$1" in
+start)
+	echo "start to init 3i config files"
+	if [ ! -d "/userdata/config" ];then
+		mkdir -p /userdata/config
+		sync
+	fi
+	
+	if [ ! -d "/userdata/miio/conf" ];then
+                mkdir -p /userdata/miio/conf
+		sync
+        fi	
+
+	if [ ! -d "/userdata/log" ];then
+		mkdir -p /userdata/log
+		sync
+	fi
+
+	if [ ! -d "/userdata/tof_config" ];then
+        	mkdir -p /userdata/tof_config
+        fi
+
+	if [ ! -f "/userdata/miio/conf/device.conf" ];then
+       		cp -rf /oem/miio/conf/*  /userdata/miio/conf/
+		sync
+        fi
+
+	if [ -f "/userdata/debug_mode" ];then
+		rm -rf /userdata/debug_mode
+		sync
+	fi
+
+	if [ -f "/userdata/sys_debug_mode" ];then
+            if [ ! -d "/userdata/debug_dir" ];then
+                mkdir -p /userdata/debug_dir/oem
+                cp -rf /oem/*  /userdata/debug_dir/oem
+                sync
+		echo "sync oem init to userdata"
+                mkdir -p /userdata/debug_dir/robot
+                cp -rf /robot/*  /userdata/debug_dir/robot
+		echo "sync robot init to userdata"
+                sync
+            fi
+	    touch  /userdata/debug_mode
+            mount -o bind /userdata/debug_dir/oem /oem
+	    echo "mount userdata oem"
+	    mount -o bind /userdata/debug_dir/robot /robot
+	    echo "mount userdata robot"
+	fi
+	
+	if [ -d "/userdata/tof_config" ];then
+        	mount -o bind /userdata/tof_config /system/etc/firmware
+	else
+		mkdir -p /userdata/tof_config
+		cp -rf /system/etc/firmware/* /userdata/tof_config/
+        	mount -o bind /userdata/tof_config /system/etc/firmware
+        fi
+	
+	if [ -d "/etc/miio" ];then
+        	mount -o bind /userdata/miio/conf /etc/miio
+        fi
+	
+	if [ ! -f "/userdata/config/specail_hwdrivers.ini" ];then
+		cp -rf /oem/sysconf/specail_hwdrivers.ini  /userdata/config/
+	fi
+ #       cp -rf /oem/miio/conf/os-release /etc/miio/
+
+   	if [ -f "/etc/miio/os-release" ];then
+        diff /etc/miio/os-release /oem/miio/conf/os-release  > /dev/null
+        if [ $? == 0 ]; then
+                echo "miio os-release file are same" >> /userdata/debug.txt
+                cp -rf /oem/miio/conf/os-release /etc/miio/
+                sync
+        else
+                if [ -f "/userdata/sys_defaut_reset" ];then
+                        cp -rf /oem/miio/conf/os-release /etc/miio/
+                        sync
+			rm -rf /userdata/sys_defaut_reset
+		else
+                
+			if [ -f "/userdata/NewOta" ];then
+                        	cp -rf /oem/miio/conf/os-release /etc/miio/
+                        	sync
+			else
+	
+                       	     OEM_VERSION_STRING=`sed -n 1p /oem/miio/conf/os-release`
+                             OEM_VERSION=${OEM_VERSION_STRING##*_}
+                             echo "OEM_VERSION_STRING=${OEM_VERSION_STRING} ${OEM_VERSION}" >> /userdata/debug.txt
+
+                             ETC_VERSION_STRING=`sed -n 1p /etc/miio/os-release`
+                             ETC_VERSION=${ETC_VERSION_STRING##*_}
+                             echo "ETC_VERSION_STRING=${ETC_VERSION_STRING} : ${ETC_VERSION}" >> /userdata/debug.txt
+
+                            if [ ${ETC_VERSION} -gt ${OEM_VERSION} ];then
+                                echo "sysversion backup need reboot" >> /userdata/debug.txt
+                                touch /userdata/sysreboot
+                                /usr/bin/updateEngine --misc=other
+                                sync
+                                reboot -f
+                           else
+                                echo "sysversion to miio" >> /userdata/debug.txt
+                                cp -rf /oem/miio/conf/os-release /etc/miio/
+                                sync
+                            fi
+                	fi
+		fi
+
+        fi
+        fi
+
+
+
+	if [ -f "/userdata/bin/dnsmasq.conf" ];then
+		diff /etc/dnsmasq.conf /userdata/bin/dnsmasq.conf  > /dev/null
+		if [ $? == 0 ]; then
+    			echo "dnsmasq.conf Both file are same" >> /userdata/debug.txt
+		else
+    			echo "dnsmasq.conf file are different" >> /userdata/debug.txt
+			cp /etc/dnsmasq.conf /userdata/bin/
+		fi
+	fi
+
+
+	if [ -f "/oem/wpa_supplicant.conf" ];then
+		diff  /userdata/cfg/wpa_supplicant.conf /oem/wpa_supplicant.conf  > /dev/null
+        	if [ $? == 0 ]; then
+               		echo "oem userdata wpa_supplicant.conf Both file are same" >> /userdata/debug.txt
+        	else
+                	echo "oem userdata wpa_supplicant.conf file are different" >> /userdata/debug.txt
+			cp -rf /oem/wpa_supplicant.conf /userdata/wpa_supplicant_oem.conf
+			cp -rf /userdata/cfg/wpa_supplicant.conf /userdata/wpa_supplicant_cfg.conf
+			cat /oem/wpa_supplicant.conf >> /userdata/debug.txt
+		fi
+	fi
+
+	ctrl_interface=`cat /userdata/cfg/wpa_supplicant.conf|grep ctrl_interface`
+        if [ -z $ctrl_interface ];then
+          	echo "/userdata/cfg/wpa_supplicant.conf file not found ctrl_interface!!!" >> /userdata/debug.txt   
+        	cp /etc/wpa_supplicant.conf /userdata/cfg/   
+		sync     
+     	fi 
+
+	
+	FILE_SIZE=`du /userdata/debug.txt | awk '{print $1}'`
+	if [ $FILE_SIZE -ge 1048576 ];then
+    		rm -rf /userdata/debug.txt
+		echo echo "/userdata/debug.txt file over delete"
+	else
+		echo echo "/userdata/debug.txt write on"
+	fi
+
+        alsactl restore -f /etc/alsa.state
+	cp -rf /oem/sysconf/*  /userdata/config/
+	sync
+	
+	;;
+stop)
+	;;
+*)
+	echo "Usage: $0 {start|stop}"
+	exit 1
+esac
+
+exit 0

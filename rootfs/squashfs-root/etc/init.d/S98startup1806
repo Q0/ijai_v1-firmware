@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -f "/robot/rk1806img/startup1806.sh" ];then
+	echo "start rk1806..."
+	/robot/rk1806img/startup1806.sh &
+fi
+
+

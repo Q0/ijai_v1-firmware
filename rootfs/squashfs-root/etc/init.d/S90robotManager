@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Start/stop Monitor
+#
+
+MONITOR=/oem/bin/Monitor
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/oem/bin
+export LD_LIBRARY_PATH=/lib:/usr/lib:/oem/lib
+
+[ -x $MONITOR ] || exit 0
+
+case "$1" in
+  start)
+	echo "Starting Monitor..."
+	start-stop-daemon -S -b -x "$MONITOR"
+	echo "OK"
+	;;
+  stop)
+	echo "Stoping Monitor..."
+	start-stop-daemon -K -n "$MONITOR"
+	;;
+  restart)
+	"$0" stop
+	sleep 1 # Prevent race condition: ensure Monitor stops before start.
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+

@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Start/stop upgrade
+#
+
+UPGRADE=/oem/bin/upgrade
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/oem/bin
+
+[ -x $UPGRADE ] || exit 0
+
+case "$1" in
+  start)
+	echo "Starting upgrade..."
+	start-stop-daemon -S -b -x "$UPGRADE"
+	echo "OK"
+	;;
+  stop)
+	echo "Stoping upgrade..."
+	start-stop-daemon -K -n "$UPGRADE"
+	;;
+  restart)
+	"$0" stop
+	sleep 1 # Prevent race condition: ensure grade stops before start.
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac

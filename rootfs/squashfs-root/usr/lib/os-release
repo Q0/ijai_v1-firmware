@@ -1,0 +1,5 @@
+NAME=Buildroot
+VERSION=2018.02-rc3-01167-gfef9505-dirty
+ID=buildroot
+VERSION_ID=2018.02-rc3
+PRETTY_NAME="Buildroot 2018.02-rc3"
